@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -45,6 +46,31 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $e)
     {
-        return parent::render($request, $e);
+
+        if ($e instanceof HttpException) {
+            $content = [
+                'status' => 'error',
+                'code' => $e->getStatusCode(),
+                'message' => Response::$statusTexts[$e->getStatusCode()]
+            ];
+        } else if ($e instanceof ValidationException) {
+            $content = [
+                'status'  => 'error',
+                'code'    => $e->getResponse()->getStatusCode(),
+                'message' => Response::$statusTexts[$e->getResponse()->getStatusCode()],
+                'fields'  => $e->validator->errors()->getMessages()
+            ];
+        } else {
+            $content = [
+                'status' => 'error',
+                'code'   => $e->getCode(),
+                'message' => $e->getMessage()
+            ];
+        }
+
+        $codes    = Response::$statusTexts;
+        $httpCode = isset($codes[ $content[ 'code' ] ]) ? $content[ 'code' ] : 500;
+
+        return new Response($content, $httpCode);
     }
 }
