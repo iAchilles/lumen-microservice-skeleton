@@ -1,7 +1,7 @@
 <?php
 namespace App\Services\Api\Console;
 
-use App\Interfaces\MicroserviceProviderInterface;
+use App\Interfaces\MicroserviceRegistryInterface;
 use Illuminate\Console\Command;
 
 /**
@@ -25,9 +25,9 @@ class RegisterApiCommand extends Command
     public function handle()
     {
         /**
-         * @var MicroserviceProviderInterface $provider
+         * @var MicroserviceRegistryInterface $provider
          */
-        $provider = app(MicroserviceProviderInterface::class);
+        $provider = app(MicroserviceRegistryInterface::class);
         $host     = $this->getHost();
         $name     = $this->getNodeName();
         $actions  = $this->getActions();
@@ -46,7 +46,7 @@ class RegisterApiCommand extends Command
             array_push($routes, [ 'action' => $key, 'route' => $value ]);
         }
 
-        $provider->register($name, $info);
+        $provider->registerMicroservice($name, $info);
         $this->info('Microservice host: ' . $host);
         $this->info('Microservice name:' . $name);
         $this->info('Registered routes:');
