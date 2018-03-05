@@ -1,13 +1,20 @@
 {
-    "name": "laravel/lumen",
-    "description": "The Laravel Lumen Framework.",
-    "keywords": ["framework", "laravel", "lumen"],
+    "name": "lumen-ms-skeleton",
+    "description": "Skeleton for Lumen microservices.",
+    "keywords": ["framework", "lumen", "microservices" ],
     "license": "MIT",
     "type": "project",
     "require": {
         "php": ">=7.0",
         "laravel/lumen-framework": "5.5.*",
-        "vlucas/phpdotenv": "~2.2"
+        "vlucas/phpdotenv": "~2.2",
+        "laravel-doctrine/orm": "^1.4",
+        "ramsey/uuid-doctrine": "^1.4",
+        "zendframework/zend-filter": "^2.7",
+        "zendframework/zend-servicemanager": "^3.3",
+        "zendframework/zend-hydrator": "^2.2",
+        "predis/predis": "^1.1",
+        "illuminate/redis": "^5.5"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
