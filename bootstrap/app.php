@@ -23,7 +23,11 @@ $app = new Laravel\Lumen\Application(
     realpath(__DIR__.'/../')
 );
 
-// $app->withFacades();
+$app->configure('api');
+$app->configure('doctrine');
+$app->configure('queue');
+$app->configure('cache');
+$app->withFacades();
 
 // $app->withEloquent();
 
@@ -38,6 +42,21 @@ $app = new Laravel\Lumen\Application(
 |
 */
 
+$app->bind(
+    App\Interfaces\MicroserviceProviderInterface::class,
+    App\Services\Api\Providers\RedisMicroserviceProvider::class
+);
+
+$app->singleton(
+    App\Interfaces\MicroserviceRegistryInterface::class,
+    App\Services\Api\MicroserviceRegistry::class
+);
+
+$app->singleton(
+    App\Services\Api\Client::class,
+    App\Services\Api\Client::class
+);
+
 $app->singleton(
     Illuminate\Contracts\Debug\ExceptionHandler::class,
     App\Exceptions\Handler::class
@@ -47,6 +66,8 @@ $app->singleton(
     Illuminate\Contracts\Console\Kernel::class,
     App\Console\Kernel::class
 );
+
+$app->alias(App\Services\Api\Client::class, 'api');
 
 /*
 |--------------------------------------------------------------------------
@@ -59,13 +80,14 @@ $app->singleton(
 |
 */
 
-// $app->middleware([
-//    App\Http\Middleware\ExampleMiddleware::class
-// ]);
+$app->middleware([
+]);
 
-// $app->routeMiddleware([
-//     'auth' => App\Http\Middleware\Authenticate::class,
-// ]);
+$app->routeMiddleware([
+    'api'         => App\Http\Middleware\ApiMiddleware::class,
+    'contentType' => App\Http\Middleware\ContentTypeMiddleware::class,
+    'response'    => App\Http\Middleware\ResponseFormatterMiddleware::class
+]);
 
 /*
 |--------------------------------------------------------------------------
@@ -78,10 +100,9 @@ $app->singleton(
 |
 */
 
-// $app->register(App\Providers\AppServiceProvider::class);
-// $app->register(App\Providers\AuthServiceProvider::class);
-// $app->register(App\Providers\EventServiceProvider::class);
-
+$app->register(LaravelDoctrine\ORM\DoctrineServiceProvider::class);
+$app->register(Illuminate\Redis\RedisServiceProvider::class);
+$app->register(\App\Services\Api\Providers\ApiServiceProvider::class);
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes
@@ -95,8 +116,13 @@ $app->singleton(
 
 $app->router->group([
     'namespace' => 'App\Http\Controllers',
+    'prefix'    => 'api'
 ], function ($router) {
-    require __DIR__.'/../routes/web.php';
+    require __DIR__.'/../routes/api.php';
 });
+
+class_alias('LaravelDoctrine\ORM\Facades\EntityManager', 'EntityManager');
+class_alias('LaravelDoctrine\ORM\Facades\Registry', 'Registry');
+class_alias('LaravelDoctrine\ORM\Facades\Doctrine', 'Doctrine');
 
 return $app;
