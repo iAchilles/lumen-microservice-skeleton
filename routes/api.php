@@ -11,6 +11,11 @@
 |
 */
 
-$router->get('/', function () use ($router) {
-    return $router->app->version();
+$router->group(['middleware' => [ 'api', 'contentType', 'response' ] ], function () use ($router) {
+
+    $router->post('/', function () {
+        return 'ok';
+    });
 });
+
+
